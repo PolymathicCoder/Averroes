@@ -1,0 +1,17 @@
+template header
+annotationTypeSimpleName
+otherAnnotationTypesSimpleNameList
+otherAnnotationTypesExpression
+
+package com.polymathiccoder.averroes.meta.validation.generated
+
+template "NotAccompaniedWith Template"
+
+rule "An element cannot be annotated with both @@@{annotationTypeSimpleName} and any other annotation from the following list: @{otherAnnotationTypesSimpleNameList}"
+	when
+    	$element : AnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class && @{otherAnnotationTypesExpression});		
+    then
+		insert(new Event("Error", "The element " + $element.getAnnotatedElement() + " cannot be annotated with both @@@{annotationTypeSimpleName} and any other annotation from the following list: @{otherAnnotationTypesSimpleNameList}"));
+end
+
+end template

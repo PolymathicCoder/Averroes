@@ -1,0 +1,18 @@
+template header
+annotationTypeSimpleName
+typesSimpleNameList
+typesParametersList
+
+package com.polymathiccoder.averroes.meta.validation.generated
+
+template "ForType Template"
+
+rule "An element annotated with @@@{annotationTypeSimpleName} must be of a type from the following list: @{typesSimpleNameList}"
+	when
+		$element : AnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class)
+		not (eval(isAnnotatedElementOfAnyType($element, Arrays.asList(@{typesParametersList}))))
+	then
+		insert(new Event("Error", "The element " + $element.getAnnotatedElement() + " annotated with @@@{annotationTypeSimpleName} must be of a type from the following list: @{typesSimpleNameList}"));
+end
+
+end template

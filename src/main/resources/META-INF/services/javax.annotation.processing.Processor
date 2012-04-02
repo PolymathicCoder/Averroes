@@ -1,0 +1,8 @@
+com.polymathiccoder.averroes.meta.validation.processing.AccompaniedWithAtLeastOneProcessor
+com.polymathiccoder.averroes.meta.validation.processing.AccompaniedWithProcessor
+#position=1
+com.polymathiccoder.averroes.meta.validation.processing.DiscoverableProcessor
+com.polymathiccoder.averroes.meta.validation.processing.ForTypeProcessor
+com.polymathiccoder.averroes.meta.validation.processing.ForTypeAnnotatedWithProcessor
+com.polymathiccoder.averroes.meta.validation.processing.ForTypeIncludingProcessor
+com.polymathiccoder.averroes.meta.validation.processing.NotAccompaniedWithProcessor

@@ -1,0 +1,108 @@
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.*;
+import java.util.regex.*;
+import com.polymathiccoder.averroes.meta.model.*;
+import com.polymathiccoder.averroes.meta.model.AnnotatedElement;
+
+//Variables
+global List errors;
+global List warnings;	
+
+//General Rules
+rule "Loop all over included elements in complex elements"
+	salience 1
+	no-loop
+	when
+    	$complexElement : ComplexAnnotatedElement()
+    	$element : AnnotatedElement() from $complexElement.getAnnotatedElements()
+    then
+    	insert($element);
+end
+
+//Domain Model
+declare Event
+	type : String
+   	message : String
+end
+
+//Event Handlers
+rule "Error Event Handling"
+	when
+		$error : Event(type == "Error");
+	then
+		errors.add($error);
+end
+
+rule "Warning Event Handling"
+	when
+		$warning : Event(type == "Warning");
+	then
+		warnings.add($warning);
+end
+
+//Helper Functions
+function boolean isAnnotatedElementOfAnyType(AnnotatedElement element, List classes) {
+	boolean flag = false;
+	for(int i = 0; i < classes.size(); i++) {
+		Class clazz = (Class) classes.get(i);
+		if (isAnnotatedElementOfType(element, clazz)) {
+			flag = true;
+		}
+	}
+	return flag;
+}
+	
+function boolean isAnnotatedElementOfType(AnnotatedElement element, Class clazz) {
+	if (element instanceof AnnotatedClass) {
+		return element.getAnnotatedElement() == clazz;
+	} else if (element instanceof AnnotatedField)
+		return ((Field) element.getAnnotatedElement()).getType() == clazz;
+	return false;
+}
+
+function boolean matchesRegex(String value, String regex) {
+	Pattern pattern = Pattern.compile(regex);
+	Matcher matcher = pattern.matcher(value);
+	return matcher.matches();
+}
+
+function Object readAttributeValueOfAnnotation(AnnotatedField field, Class annotationType, String attribute) {
+	Annotation annotation = field.getAnnotatedElement().getAnnotation(annotationType);	
+	Object value = null;
+	Method[] methods = annotationType.getDeclaredMethods();
+    for(int i = 0; i < methods.length; i++) {
+		if (methods[i].getName().equals(attribute)) {
+			value = methods[i].invoke(annotation);
+		}
+	}
+	return value;
+}
+
+function boolean isAnnotatedElementTypeAnnotatedWith(AnnotatedElement element, Class annotationType) {
+	if (element instanceof AnnotatedClass) {
+		Class classType = (Class) element.getAnnotatedElement();
+		return isClassAnnotatedWith(classType, annotationType);
+	} else if (element instanceof AnnotatedField) {
+		Class fieldType = ((Field) element.getAnnotatedElement()).getType();
+		return isClassAnnotatedWith(fieldType, annotationType);
+	}
+	return false;
+}
+
+function boolean isAnnotatedClassAnnotatedWith(AnnotatedClass clazz, Class annotationType) {
+	Class classType = (Class) clazz.getAnnotatedElement();
+	return isClassAnnotatedWith(classType, annotationType);
+}
+
+function boolean isClassAnnotatedWith(Class clazz, Class annotationType) {
+	boolean flag = false;
+	for (int i = 0; i < clazz.getAnnotations().length; i++) {
+    	if (clazz.getAnnotations()[i].annotationType() == annotationType) {
+   			flag = true;
+    	}
+    }
+    return flag;
+}
+
+//Rule Set

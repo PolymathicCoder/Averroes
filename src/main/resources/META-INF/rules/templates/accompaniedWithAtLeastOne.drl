@@ -1,0 +1,17 @@
+template header
+annotationTypeSimpleName
+otherAnnotationTypesSimpleNameList
+otherAnnotationTypesExpression
+
+package com.polymathiccoder.averroes.meta.validation.generated
+
+template "AccompaniedWithAtLeastOne Template"
+
+rule "An element must be annotated with @@@{annotationTypeSimpleName} and at least one of the annotations from the following list: @{otherAnnotationTypesSimpleNameList}"
+	when
+		$element : AnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class && @{otherAnnotationTypesExpression})
+    then
+		insert(new Event("Error", "The element " + $element.getAnnotatedElement() + " must be annotated with @@@{annotationTypeSimpleName} and at least one of the annotations from the following list: @{otherAnnotationTypesSimpleNameList}"));
+end
+
+end template

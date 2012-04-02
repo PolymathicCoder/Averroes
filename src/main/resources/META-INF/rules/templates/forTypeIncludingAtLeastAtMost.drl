@@ -1,0 +1,28 @@
+template header
+annotationTypeSimpleName
+includedAnnotationTypeSimpleName
+exactly
+atLeast
+atMost
+
+package com.polymathiccoder.averroes.meta.validation.generated
+
+template "OnlyUsedForTypeIncluding Template"
+
+rule "A complex element annotated with @@@{annotationTypeSimpleName} must include at least @{atLeast} element(s) annotated with @@@{includedAnnotationTypeSimpleName}"
+	when
+    	$complex : ComplexAnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class)
+		$count : Number(intValue < @{atLeast}) from accumulate($value : AnnotatedElement(getAnnotationTypes() contains @{includedAnnotationTypeSimpleName}.class) from $complex.getAnnotatedElements(), count($value))		    	
+    then
+    	insert(new Event("Error", "The complex element " + $complex.getAnnotatedElement() + " annotated with @@@{annotationTypeSimpleName} must include at least @{atLeast} element(s) annotated with @@@{includedAnnotationTypeSimpleName}"));
+end
+
+rule "A complex element annotated with @@@{annotationTypeSimpleName} must include at most @{atMost} element(s) annotated with @@@{includedAnnotationTypeSimpleName}"
+	when
+    	$complex : ComplexAnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class)
+		$count : Number(intValue > @{atMost}) from accumulate($value : AnnotatedElement(getAnnotationTypes() contains @{includedAnnotationTypeSimpleName}.class) from $complex.getAnnotatedElements(), count($value))		    	
+    then
+    	insert(new Event("Error", "The complex element " + $complex.getAnnotatedElement() + " annotated with @@@{annotationTypeSimpleName} must include at most @{atMost} element(s) annotated with @@@{includedAnnotationTypeSimpleName}"));
+end
+
+end template

@@ -1,0 +1,18 @@
+template header
+annotationTypeSimpleName
+annotatedTypeAnnotationTypeSimpleName
+
+
+package com.polymathiccoder.averroes.meta.validation.generated
+
+template "ForTypeAnnotatedWith Template"
+
+rule "An element annotated with @@@{annotationTypeSimpleName} must be of a class annotated with @@@{annotatedTypeAnnotationTypeSimpleName}"
+	when
+		$element : AnnotatedElement(getAnnotationTypes() contains @{annotationTypeSimpleName}.class)
+		not (eval(isAnnotatedElementTypeAnnotatedWith($element, @{annotatedTypeAnnotationTypeSimpleName}.class)))
+	then
+		insert(new Event("Error", "The element " + $element.getAnnotatedElement() + " annotated with @@@{annotationTypeSimpleName} must be of a class annotated with @@@{annotatedTypeAnnotationTypeSimpleName}"));
+end
+
+end template
