@@ -39,7 +39,7 @@ public class ForTypeProcessor extends AbstractProcessor {
 	private Types typeUtils;
 
     @Override
-    public void init(ProcessingEnvironment processingEnv) {
+    public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         elementUtils = processingEnv.getElementUtils();
         typeUtils = processingEnv.getTypeUtils();
@@ -92,6 +92,6 @@ public class ForTypeProcessor extends AbstractProcessor {
 			DroolsRuleCodeGenerator.generateForForType(annotationTypeSimpleName, otherAnnotationTypesSimpleNameList);
 		}
 
-		return false;
+		return true;
 	}
 }

@@ -32,7 +32,7 @@ public class ForTypeIncludingProcessor extends AbstractProcessor {
     private Elements elementUtils;
 
     @Override
-    public void init(ProcessingEnvironment processingEnv) {
+    public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         elementUtils = processingEnv.getElementUtils();
     }
@@ -86,6 +86,6 @@ public class ForTypeIncludingProcessor extends AbstractProcessor {
 			}
 		}
 
-		return false;
+		return true;
 	}
 }

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface NotAccompaniedWith {
 	Class<? extends Annotation>[] value();
 }

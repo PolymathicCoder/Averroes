@@ -1,0 +1,9 @@
+public AnnotatedWith$annotation.getSimpleName()(Annotated annotated#if($annotation.getDeclaredMethods().size() > 0), #end#foreach($attribute in $annotation.getDeclaredMethods())$attribute.getReturnType().getCanonicalName() $attribute.getName()#if(!$$foreach.last), #end#end) {
+	super(annotated);
+#if($annotation.getDeclaredMethods().size() == 0)
+	((com.google.common.collect.HashMultimap) decoratedAnnotated.getAnnotationTypesAndData()).put(${annotation.getSimpleName()}.class, null);
+#end
+#foreach($attribute in $annotation.getDeclaredMethods())
+	((com.google.common.collect.HashMultimap) decoratedAnnotated.getAnnotationTypesAndData()).put(${annotation.getSimpleName()}.class, org.apache.commons.lang3.tuple.ImmutablePair.of("$attribute.getName()", $attribute.getName()));
+#end
+}

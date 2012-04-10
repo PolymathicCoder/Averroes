@@ -1,8 +1,12 @@
 package com.polymathiccoder.averroes.meta.processing;
 
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -13,12 +17,19 @@ import javassist.LoaderClassPath;
 import javassist.Modifier;
 import javassist.NotFoundException;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.polymathiccoder.averroes.meta.model.AnnotatedDecorator;
 
 public class MetaProcessingCodeGenerator {
+	private final static VelocityEngine VELOCITY_ENGINE;
+	static {
+		VELOCITY_ENGINE = new VelocityEngine();
+		Properties props = new Properties();
+	    props.put("resource.loader", "class");
+	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+	    props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
+	    VELOCITY_ENGINE.init(props);
+	}
+	
 	//Concrete Annotated Element Processor Strategy Generator
 	@SuppressWarnings("unchecked")
 	public static Class<? extends AnnotatedDecorator> generateAndLoadConcreteAnnotatedElementProcessorStrategyForAnnotation(Class<? extends Annotation> annotationType) {
@@ -60,38 +71,11 @@ public class MetaProcessingCodeGenerator {
 	}
 	
 	private static String generateConcreteAnnotatedElementProcessorStrategyExecuteMethodForAnnotation(Class<? extends Annotation> annotationType) {		
-		//Access, name, and params
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("public Annotated execute(AnnotatedElement annotatedElement) {\n")
-		//Body
-		.append("\t")
-		.append(annotationType.getSimpleName())
-		.append(" annotation = null;\n")
-		.append("\tif (annotatedElement.getAnnotatedElement() instanceof Class) {\n")
-		.append("\t\tannotation = ((Class) annotatedElement.getAnnotatedElement()).getAnnotation(")
-		.append(annotationType.getSimpleName())
-		.append(".class);\n")
-		.append("\t} else if (annotatedElement.getAnnotatedElement() instanceof Field) {\n")
-		.append("\t\tannotation = ((Field) annotatedElement.getAnnotatedElement()).getAnnotation(")
-		.append(annotationType.getSimpleName())
-		.append(".class);\n\t}\n")
-		.append("\tif (annotation == null) return annotatedElement;\n")
-		.append("\treturn new AnnotatedWith")
-		.append(annotationType.getSimpleName())
-		.append("(annotatedElement");
-		if (annotationType.getDeclaredMethods().length != 0) {
-			stringBuilder.append(", ")
-				.append(Joiner.on(", ").join(Lists.transform(Arrays.asList(annotationType.getDeclaredMethods()), new MethodCallExtractor())));
-		}
-		stringBuilder.append(");\n");
-		stringBuilder.append("}");
-		
-		return stringBuilder.toString();
-	}
-	
-	private static class MethodCallExtractor implements Function<Method, String> {
-	    public String apply(Method method) {
-	    	return "annotation." + method.getName() + "()";
-	    }    
+		Template template = VELOCITY_ENGINE.getTemplate("META-INF/concreteAnnotatedElementProcessorStrategyExecuteMethod.vm");
+        VelocityContext context = new VelocityContext();
+        context.put("annotation", annotationType);
+        StringWriter writer = new StringWriter();
+        template.merge(context, writer);
+        return writer.toString();
 	}
 }

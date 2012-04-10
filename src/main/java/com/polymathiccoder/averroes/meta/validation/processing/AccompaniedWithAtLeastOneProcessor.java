@@ -34,7 +34,7 @@ public class AccompaniedWithAtLeastOneProcessor extends AbstractProcessor {
 	private Elements elementUtils;
 
     @Override
-    public void init(ProcessingEnvironment processingEnv) {
+    public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         elementUtils = processingEnv.getElementUtils();
     }
@@ -79,6 +79,6 @@ public class AccompaniedWithAtLeastOneProcessor extends AbstractProcessor {
 			DroolsRuleCodeGenerator.generateForAccompaniedWithAtLeastOne(annotationTypeSimpleName, otherAnnotationTypesSimpleNameList);
 		}
 
-		return false;
+		return true;
 	}
 }

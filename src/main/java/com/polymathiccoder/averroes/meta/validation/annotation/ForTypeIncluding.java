@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface ForTypeIncluding {
 	int exactly() default 1;
 	int atLeast() default 0;

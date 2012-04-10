@@ -1,8 +1,12 @@
 package com.polymathiccoder.averroes.meta.model;
 
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -13,11 +17,17 @@ import javassist.LoaderClassPath;
 import javassist.Modifier;
 import javassist.NotFoundException;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-
 public class MetaModelCodeGenerator {
+	private final static VelocityEngine VELOCITY_ENGINE;
+	static {
+		VELOCITY_ENGINE = new VelocityEngine();
+		Properties props = new Properties();
+	    props.put("resource.loader", "class");
+	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+	    props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
+	    VELOCITY_ENGINE.init(props);
+	}
+	
 	//Concrete Decorator Class Generator
 	@SuppressWarnings("unchecked")
 	public static Class<? extends AnnotatedDecorator> generateAndLoadConcreteDecoratorClassForAnnotationType(Class<? extends Annotation> annotationType) {
@@ -35,8 +45,8 @@ public class MetaModelCodeGenerator {
 				CtClass superClass = classPool.get("com.polymathiccoder.averroes.meta.model.AnnotatedDecorator");
 				ctClass = classPool.makeClass(generatedClassName);
 				ctClass.setSuperclass(superClass);
-				ctClass.setModifiers(Modifier.PUBLIC);
-			
+				ctClass.setModifiers(Modifier.PUBLIC);				
+				
 				CtConstructor ctConstructor = CtNewConstructor.make(generateConcreteDecoratorClassContructorForAnnotationType(annotationType), ctClass);
 				ctConstructor.setModifiers(Modifier.PUBLIC);
 				ctClass.addConstructor(ctConstructor);
@@ -57,43 +67,11 @@ public class MetaModelCodeGenerator {
 	}
 	
 	private static String generateConcreteDecoratorClassContructorForAnnotationType(Class<? extends Annotation> annotationType) {
-		//Access and name
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("public AnnotatedWith")
-			.append(annotationType.getSimpleName())
-		//Parameters
-			.append("(Annotated annotated");
-		if (annotationType.getDeclaredMethods().length != 0) {
-			stringBuilder.append(", ")
-				.append(Joiner.on(", ").join(Lists.transform(Arrays.asList(annotationType.getDeclaredMethods()), new MethodParameterTypeAndNameExtractor())));
-		}
-		stringBuilder.append(") {\n")
-		//Body
-			.append("\tsuper(annotated);\n");
-		for (Method attribute : annotationType.getDeclaredMethods()) {
-			stringBuilder.append("\t((com.google.common.collect.HashMultimap) decoratedAnnotated.getAnnotationTypesAndData()).put(")
-				.append(annotationType.getSimpleName())
-				.append(".class, org.apache.commons.lang3.tuple.ImmutablePair.of(\"")
-				.append(attribute.getName())
-				.append("\", ")
-				.append(attribute.getName())
-				.append("));\n");
-		}
-		
-		if (annotationType.getDeclaredMethods().length == 0) {
-			stringBuilder.append("\t((com.google.common.collect.HashMultimap) decoratedAnnotated.getAnnotationTypesAndData()).put(")
-				.append(annotationType.getSimpleName())
-				.append(".class, null);\n");
-		}
-		
-		stringBuilder.append("}");
-				
-		return stringBuilder.toString();
-	}
-	
-	private static class MethodParameterTypeAndNameExtractor implements Function<Method, String> {
-	    public String apply(Method method) {
-	    	return method.getReturnType().getCanonicalName() + " " + method.getName();
-	    }    
+        Template template = VELOCITY_ENGINE.getTemplate("META-INF/concreteDecoratorClassContructor.vm");
+        VelocityContext context = new VelocityContext();
+        context.put("annotation", annotationType);
+        StringWriter writer = new StringWriter();
+        template.merge(context, writer);
+        return writer.toString();
 	}
 }

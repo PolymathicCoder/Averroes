@@ -1,0 +1,10 @@
+public Annotated execute(AnnotatedElement annotatedElement) {
+	$annotation.getSimpleName() annotation = null;
+	if (annotatedElement.getAnnotatedElement() instanceof Class) {
+		annotation = ((Class) annotatedElement.getAnnotatedElement()).getAnnotation(${annotation.getSimpleName()}.class);
+	} else if (annotatedElement.getAnnotatedElement() instanceof Field) {
+		annotation = ((Field) annotatedElement.getAnnotatedElement()).getAnnotation(${annotation.getSimpleName()}.class);
+	}
+	if (annotation == null) return annotatedElement;
+	return new AnnotatedWith$annotation.getSimpleName()(annotatedElement#if($annotation.getDeclaredMethods().size() > 0), #end#foreach($attribute in $annotation.getDeclaredMethods())annotation.$attribute.getName()()#if(!$$foreach.last), #end#end);
+}
