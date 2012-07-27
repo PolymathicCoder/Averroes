@@ -44,29 +44,29 @@ public class ForTypeProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         typeUtils = processingEnv.getTypeUtils();
     }
-    
+
 	@Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
 		LOGGER.info("Processing @ForType: Creating Drools validation rules");
 
 		String annotationTypeSimpleName = StringUtils.EMPTY;
-		
+
 		Set<? extends Element> rootElements = roundEnvironment.getRootElements();
 		for (Element element : rootElements) {
 			if (element.getAnnotation(ForType.class) == null) {
 				continue;
 			}
-			
+
 			List<String> otherAnnotationTypesSimpleNameList = Lists.newArrayList();
-			
+
 			annotationTypeSimpleName = element.getSimpleName().toString();
 
 			Element forTypeElement = elementUtils.getTypeElement(ForType.class.getName());
-						
+
 			AnnotationValue forTypeValueAttribute = null;
-			
+
 			for (AnnotationMirror forTypeAnnotationMirror : elementUtils.getAllAnnotationMirrors(element)) {
-	            if (forTypeAnnotationMirror.getAnnotationType().equals(forTypeElement.asType())) {	            	
+	            if (forTypeAnnotationMirror.getAnnotationType().equals(forTypeElement.asType())) {
 	            	for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementUtils.getElementValuesWithDefaults(forTypeAnnotationMirror).entrySet()) {
 	                	if("value".equals(entry.getKey().getSimpleName().toString())) {
 	                		forTypeValueAttribute = entry.getValue();
@@ -74,7 +74,7 @@ public class ForTypeProcessor extends AbstractProcessor {
 	                }
 	            }
 	        }
-			
+
 			@SuppressWarnings("unchecked")
 			List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) forTypeValueAttribute.getValue();
 
@@ -88,7 +88,7 @@ public class ForTypeProcessor extends AbstractProcessor {
 					otherAnnotationTypesSimpleNameList.add(typeUtils.asElement(typeMirror).getSimpleName().toString());
 				}
 			}
-						
+
 			DroolsRuleCodeGenerator.generateForForType(annotationTypeSimpleName, otherAnnotationTypesSimpleNameList);
 		}
 
