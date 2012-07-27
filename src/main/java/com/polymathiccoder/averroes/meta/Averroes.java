@@ -2,6 +2,7 @@ package com.polymathiccoder.averroes.meta;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -19,13 +20,28 @@ import com.polymathiccoder.averroes.meta.processing.AnnotatedElementVisitor;
 import com.polymathiccoder.averroes.meta.util.AnnotationDiscoverer;
 import com.polymathiccoder.averroes.meta.validation.AnnotatedElementValidator;
 import com.polymathiccoder.averroes.meta.validation.ValidationResult;
+import com.polymathiccoder.averroes.meta.validation.annotation.Discoverable;
 
 public class Averroes {
+	private Set<AnnotatedElementProcessorStrategy> processorStrategies;
 	private AnnotatedElementVisitor visitor;
 	private AnnotatedElementValidator validator;
 
-	public Averroes(String annotationPackage) {
-		Set<AnnotatedElementProcessorStrategy> processorStrategies = Sets.newHashSet();
+	public Averroes() {
+		processorStrategies = Sets.newHashSet();
+		processDiscoverablePackages();
+	}
+
+	private void processDiscoverablePackages() {
+		Set<Class<?>> annotatedPackages = AnnotationDiscoverer.discoverAnnotatedWith(Discoverable.class);
+    	Iterator<Class<?>> it = annotatedPackages.iterator();
+    	while (it.hasNext()) {
+    		Package annotatedPackage = it.next().getPackage();
+    		processDiscoverablePackage(annotatedPackage.getName());
+    	}
+	}
+
+	private void processDiscoverablePackage(String annotationPackage) {
 		for (Class<? extends Annotation> annotationType : AnnotationDiscoverer.discoverAnnotationsOfType(annotationPackage, Annotation.class)) {
 			processorStrategies.add(Genesis.letThereBeAProcessorStrategy(annotationType));
 		}
